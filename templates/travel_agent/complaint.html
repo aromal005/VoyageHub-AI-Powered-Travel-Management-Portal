@@ -2,46 +2,49 @@
 {% block content %}
 
 <div class="container mt-4">
-    <h2 class="mb-4">User Complaints</h2>
+    <h2 class="mb-4">Package Ratings and Feedback</h2>
 
     <div class="table-responsive">
         <table class="table table-bordered table-striped">
             <thead class="thead-dark">
                 <tr>
                     <th>#</th>
-                    <th>User</th>
                     <th>Package</th>
-                    <th>Complaint</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Action</th>
+                    <th>Average Rating</th>
+                    <th>Feedback</th>
                 </tr>
             </thead>
             <tbody>
-                {% for complaint in complaints %}
+                {% for package in packages %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ complaint.user.username }}</td>
-                    <td>{{ complaint.travel_package.package_name }}</td>
-                    <td>{{ complaint.details }}</td>
+                    <td>{{ package.package_name }}</td>
                     <td>
-                        {% if complaint.status == "Pending" %}
-                            <span class="badge bg-warning text-dark">Pending</span>
-                        {% elif complaint.status == "Resolved" %}
-                            <span class="badge bg-success">Resolved</span>
+                        {% if package.avg_rating %}
+                            {{ package.avg_rating|floatformat:1 }} / 5
                         {% else %}
-                            <span class="badge bg-danger">Rejected</span>
+                            No ratings
                         {% endif %}
                     </td>
-                    <td>{{ complaint.date|date:"d M Y, h:i A" }}</td>
                     <td>
-                        <a href="#" class="btn btn-success btn-sm">Resolve</a>
-                        <a href="#" class="btn btn-danger btn-sm">Reject</a>
+                        {% if package.feedback_list %}
+                            <ul class="list-unstyled mb-0">
+                                {% for feedback in package.feedback_list %}
+                                    <li>
+                                        <strong>{{ feedback.user }}</strong> ({{ feedback.rating }} stars):
+                                        {{ feedback.feedback }} 
+                                        <small>({{ feedback.created_at|date:"d M Y" }})</small>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            No feedback
+                        {% endif %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center">No complaints found.</td>
+                    <td colspan="4" class="text-center">No packages found.</td>
                 </tr>
                 {% endfor %}
             </tbody>

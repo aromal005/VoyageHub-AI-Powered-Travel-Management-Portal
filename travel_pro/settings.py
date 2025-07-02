@@ -161,9 +161,8 @@ NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 # STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
 # STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 #print("GEMINI_API_KEY:", GEMINI_API_KEY)
-STRIPE_PUBLIC_KEY = "pk_test_51R4kZCBFjnvExNSEuqjWufT8Fgo4Si4Iyo0sWo4dQ6mFQD9XF6ZM6EVzt1GhubkAgri4Uwx1lOo7M0JOgVjdQzUb00F6nqGBTY"
-STRIPE_SECRET_KEY = "sk_test_51R4kZCBFjnvExNSEnABk3rpoQ0X4KcvtDfdRfX4ggxfyRn3xseaWfDFpYU7j4CWTOkM8wbjJGi2048kIDc4HexzL00vrMJmv4K"
-
+STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 # Load Firebase credentials
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR, "service-account.json")
@@ -187,6 +186,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'aromalvv005@gmail.com'  # Replace with your email
-EMAIL_HOST_PASSWORD = 'gjaj cqge cgow ebbz'  # Replace with your app-specific password
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER') # Replace with your email
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')  # Replace with your app-specific password
 DEFAULT_FROM_EMAIL = 'aromalvv005@gmail.com'

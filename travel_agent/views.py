@@ -19,6 +19,7 @@ from django.utils.dateparse import parse_date
 from django.db.models import Q
 from datetime import date, timedelta
 from admin_app.models import *
+from django.db.models import Sum, Count, Avg
 
 def travel_agent_register(request):
     return render(request, 'travel_agent/dashboard.html')
@@ -33,8 +34,36 @@ def travel_agent_logout(request):
 
 @login_required(login_url='login')
 def dashboard(request):
+    # Ensure the user is a travel agent
+    if request.user.user_type != 'travel_agent':
+        return render(request, 'travel_agent/error.html', {'message': 'Access denied. Travel agents only.'})
+
     username = request.user.username  # Get logged-in user's username
-    return render(request, 'travel_agent/dashboard.html', {'username': username})
+
+    # Get total packages for the logged-in travel agent
+    total_packages = TravelPackage.objects.filter(travel_agent=request.user).count()
+    print(f"Total packages for {username}: {total_packages}")
+
+    # Get bookings for the agent's packages
+    bookings = Booking.objects.filter(travel_package__travel_agent=request.user)
+    total_bookings = bookings.count()
+    print(f"Total bookings for {username}: {total_bookings}")
+
+    # Calculate total revenue from confirmed and paid bookings
+    total_revenue = bookings.filter(status='confirmed', payment_status='paid').aggregate(
+        total=Sum('total_price')
+    )['total'] or 0
+    print(f"Total revenue for {username}: {total_revenue}")
+
+    context = {
+        'username': username,
+        'total_packages': total_packages,
+        'total_bookings': total_bookings,
+        'total_revenue': f"${float(total_revenue):,.2f}",
+    }
+    print(f"Context sent to template: {context}")
+
+    return render(request, 'travel_agent/dashboard.html', context)  
 
 
 def manage_package(request):
@@ -104,7 +133,54 @@ def create_category(request):
     return render(request, 'travel_agent/create_category.html')
 
 def complaint(request):
-    return render(request, 'travel_agent/complaint.html')
+    # Ensure the user is a travel agent
+    if request.user.user_type != 'travel_agent':
+        return render(request, 'travel_agent/error.html', {'message': 'Access denied. Travel agents only.'})
+
+    # Fetch travel packages for the logged-in travel agent
+    packages = TravelPackage.objects.filter(travel_agent=request.user).select_related()
+
+    # Fetch ratings for the travel agent's packages
+    package_ratings = PackageRating.objects.filter(
+        travel_package__travel_agent=request.user
+    ).select_related('travel_package', 'user')
+
+    # Calculate average rating per package
+    rating_averages = package_ratings.values('travel_package__id').annotate(
+        avg_rating=Avg('rating')
+    )
+    rating_dict = {item['travel_package__id']: item['avg_rating'] for item in rating_averages}
+
+    # Prepare feedback data
+    feedback_dict = {}
+    for rating in package_ratings:
+        if rating.feedback:
+            if rating.travel_package_id not in feedback_dict:
+                feedback_dict[rating.travel_package_id] = []
+            feedback_dict[rating.travel_package_id].append({
+                'user': rating.user.username,
+                'rating': rating.rating,
+                'feedback': rating.feedback,
+                'created_at': rating.created_at
+            })
+
+    # Prepare package data with ratings and feedback
+    package_data = []
+    for package in packages:
+        package_id = package.id
+        package_data.append({
+            'id': package_id,
+            'package_name': package.package_name,
+            'avg_rating': rating_dict.get(package_id, None),
+            'feedback_list': feedback_dict.get(package_id, [])
+        })
+
+    context = {
+        'packages': package_data,
+    }
+    print(f"Package data with ratings and feedback: {package_data}")
+
+    return render(request, 'travel_agent/complaint.html', context)
 
 def view_payment(request):
     return render(request, 'travel_agent/payment.html')

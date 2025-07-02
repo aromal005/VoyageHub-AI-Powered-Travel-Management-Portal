@@ -39,9 +39,6 @@
                 <a href="{% url 'wishlist' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'wishlist' %}active{% endif %}">
                     <i class="fas fa-heart"></i> Wishlists
                 </a>
-                <a href="{% url 'user_complaint_view' %}" class="list-group-item list-group-item-action">
-                    <i class="fas fa-map-marker-alt"></i> My Address
-                </a>
                 <a href="{% url 'coupon' %}" class="list-group-item list-group-item-action">
                     <i class="fas fa-ticket-alt"></i> Coupons
                 </a>
@@ -51,7 +48,7 @@
                 <a href="{% url 'user_blog' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'user_blog' %}active{% endif %}">
                     <i class="fas fa-blog"></i> Blog
                 </a>
-                <a href="" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'complaints' %}active{% endif %}">
+                <a href="#" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'complaints' %}active{% endif %}">
                     <i class="fas fa-exclamation-circle"></i> Complaints
                 </a>
                 <a href="{% url 'logout' %}" class="list-group-item list-group-item-action">

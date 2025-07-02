@@ -20,55 +20,7 @@
 
 
     <!-- Booking Start -->
-    <div class="container-fluid booking mt-5 pb-5">
-        <div class="container pb-5">
-            <div class="bg-light shadow" style="padding: 30px;">
-                <div class="row align-items-center" style="min-height: 60px;">
-                    <div class="col-md-10">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="mb-3 mb-md-0">
-                                    <select class="custom-select px-4" style="height: 47px;">
-                                        <option selected>Destination</option>
-                                        <option value="1">Destination 1</option>
-                                        <option value="2">Destination 1</option>
-                                        <option value="3">Destination 1</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="mb-3 mb-md-0">
-                                    <div class="date" id="date1" data-target-input="nearest">
-                                        <input type="text" class="form-control p-4 datetimepicker-input" placeholder="Depart Date" data-target="#date1" data-toggle="datetimepicker"/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="mb-3 mb-md-0">
-                                    <div class="date" id="date2" data-target-input="nearest">
-                                        <input type="text" class="form-control p-4 datetimepicker-input" placeholder="Return Date" data-target="#date2" data-toggle="datetimepicker"/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="mb-3 mb-md-0">
-                                    <select class="custom-select px-4" style="height: 47px;">
-                                        <option selected>Duration</option>
-                                        <option value="1">Duration 1</option>
-                                        <option value="2">Duration 1</option>
-                                        <option value="3">Duration 1</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-primary btn-block" type="submit" style="height: 47px; margin-top: -2px;">Submit</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    ?
     <!-- Booking End -->
 
 
@@ -83,7 +35,9 @@
                         <div class="col-md-6 mb-4 pb-2">
                             <div class="blog-item">
                                 <div class="position-relative">
+                                    {% if blog.image.url %}
                                     <img class="img-fluid w-100" src="{{ blog.image.url }}" alt="">
+                                    {% endif %}
                                     <div class="blog-date">
                                         <h6 class="font-weight-bold mb-n1">{{ blog.created_at|date:"d" }}</h6>
                                         <small class="text-white text-uppercase">{{ blog.created_at|date:"M" }}</small>
@@ -134,10 +88,11 @@
                     
     
                     <!-- Search Form -->
+                    {% comment %} <form method="GET" action="{% url 'blog' %}">
                     <div class="mb-5">
                         <div class="bg-white" style="padding: 30px;">
                             <div class="input-group">
-                                <input type="text" class="form-control p-4" placeholder="Keyword">
+                                <input type="text" name="search_query" class="form-control p-4" placeholder="Keyword" value="{{ search_query }}">
                                 <div class="input-group-append">
                                     <span class="input-group-text bg-primary border-primary text-white"><i
                                             class="fa fa-search"></i></span>
@@ -145,23 +100,40 @@
                             </div>
                         </div>
                     </div>
+                    </form> {% endcomment %}
+
+                    <form method="GET" action="{% url 'blog' %}">
+                    <div class="mb-5">
+                        <div class="bg-white" style="padding: 30px;">
+                            <div class="input-group">
+                                <input type="text" name="search_query" class="form-control p-4" placeholder="Keyword" value="{{ search_query|default_if_none:'' }}">
+                                <div class="input-group-append">
+                                    <button type="submit" class="input-group-text bg-primary border-primary text-white">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
 
                     <!-- Category List -->
                     <div class="mb-5">
-                        <h4 class="text-uppercase mb-4" style="letter-spacing: 5px;">Categories</h4>
-                        <div class="bg-white" style="padding: 30px;">
-                            <ul class="list-inline m-0">
-                                {% for category in category_blog_counts %}
-                                <li class="mb-3 d-flex justify-content-between align-items-center">
-                                    <a class="text-dark" href="#"><i class="fa fa-angle-right text-primary mr-2"></i>
-                                        {{ category.name }}
-                                    </a>
-                                    <span class="badge badge-primary badge-pill">{{ category.blog_count }}</span>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
+                    <h4 class="text-uppercase mb-4" style="letter-spacing: 5px;">Categories</h4>
+                    <div class="bg-white" style="padding: 30px;">
+                        <ul class="list-inline m-0">
+                            {% for category in category_blog_counts %}
+                            <li class="mb-3 d-flex justify-content-between align-items-center">
+                                <a class="text-dark" href="{% url 'blog' %}?category={{ category.name|urlencode }}{% if search_query %}&search_query={{ search_query|urlencode }}{% endif %}">
+                                    <i class="fa fa-angle-right text-primary mr-2"></i>
+                                    {{ category.name }}
+                                </a>
+                                <span class="badge badge-primary badge-pill">{{ category.blog_count }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
                     </div>
+                </div>
     
                     <!-- Recent Post -->
                     <div class="mb-5">
