@@ -8,9 +8,13 @@ urlpatterns = [
     path('about/', views.about, name='about'),
     path('service/', views.service, name='service'),
     path('package/', views.package, name='package'),
-    path('blog/', views.blog, name='blog'),
     path('contact/', views.contact, name='contact'),
+
+    #add blog, comment, view single blog
+    path('blog/', views.blog, name='blog'),
     path('single/<int:bid>/', views.single, name='single'),
+    path('blog/<int:bid>/comment/', views.add_comment, name='add_comment'),
+
     path('testimonial/', views.testimonial, name='testimonial'),
     path('guide/', views.guide, name='guide'),
     path('destination/', views.destination, name='destination'),

@@ -12,8 +12,14 @@ from django.core.exceptions import PermissionDenied
 
 # Create your views here.
 def admin_dashboard(request):
+    total_user = CustomUser.objects.all().count()
+    subscription_count = TravelAgentProfile.objects.filter(is_pro=True).count()
+    revenue = Commission.objects.filter(admin=request.user).aggregate(total=Sum('amount'))['total'] or 0
     context = {
         'notifications': get_notifications(),
+        'total_user':total_user,
+        'subscription_count':subscription_count,
+        'revenue':f"${float(revenue):,.2f}",
     }
     return render(request, 'admin_app/admin_dashboard.html', context)
 
@@ -37,6 +43,8 @@ def customer_management(request):
         # Get booking stats
         bookings = Booking.objects.filter(user=customer)
         total_bookings = bookings.count()
+        latest_rating = PackageRating.objects.filter(user=customer).order_by('-id').first()
+
         
         # Get last booking date
         last_booking = bookings.order_by('-booking_date').first()
@@ -55,8 +63,9 @@ def customer_management(request):
             'total_bookings': total_bookings,
             'last_booking_date': last_booking_date,
             'preferred_destinations': preferred_destinations,
+            'latest_rating': latest_rating.rating if latest_rating else "No rating given",
         })
-    
+        
     context = {
         'customers': customer_data,
         'search_query': search_query,
@@ -212,7 +221,7 @@ def send_message(request):
 def commission_report(request):
         
     # Fetch commissions for the logged-in admin
-    commissions = Commission.objects.all().order_by('-created_at')
+    commissions = Commission.objects.filter(admin=request.user)
 
     # Aggregate totals
     commission_summary = commissions.aggregate(
@@ -230,4 +239,5 @@ def commission_report(request):
         }
     }
 
+    print(f"context : {context}")
     return render(request, 'admin_app/commission_report.html', context)

@@ -95,7 +95,16 @@ def blog(request):
     blogs = Blog.objects.all()
     category_blog_counts = Category.objects.annotate(blog_count=Count('blog'))
     recent_blogs = Blog.objects.order_by('-created_at')[:5]
-    return render(request, 'user/blog.html', {"blogs":blogs, "category_blog_counts":category_blog_counts, "recent_blogs":recent_blogs})
+    
+    search_query = request.GET.get('search_query')
+    category_filter = request.GET.get('category')
+    if search_query:
+        blogs = blogs.filter(title__icontains=search_query)
+
+    if category_filter:
+        blogs = blogs.filter(category__name=category_filter)
+
+    return render(request, 'user/blog.html', {"blogs":blogs, "category_blog_counts":category_blog_counts, "recent_blogs":recent_blogs, "search_query":search_query, "category_filter":category_filter})
 
 def contact(request):
     return render(request, 'user/contact.html')
@@ -105,7 +114,36 @@ def single(request, bid):
     category_blog_counts = Category.objects.annotate(blog_count=Count('blog'))
     recent_blogs = Blog.objects.order_by('-created_at')[:5]
     parts = blog.content.split("[image]") 
-    return render(request, 'user/single.html', {"blog":blog, "parts": parts, "category_blog_counts":category_blog_counts, "recent_blogs":recent_blogs})
+
+    comments = Comments.objects.filter(blog=blog)
+
+    comment_count = comments.count()
+    print(f"User : {request.user}")
+
+    
+    return render(request, 'user/single.html', {"blog":blog, "parts": parts, "category_blog_counts":category_blog_counts, "recent_blogs":recent_blogs, "comments":comments, "comment_count":comment_count})
+
+def add_comment(request, bid):
+    blog = get_object_or_404(Blog, id=bid)
+    
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        comment = request.POST.get('comment')
+        
+        # Validate form data
+        if not name or not email or not comment:
+            messages.error(request, "All required fields must be filled.")
+        else:
+            # Create and save the comment
+            Comments.objects.create(user=request.user if request.user.is_authenticated else name,email=email,comment=comment,blog=blog)
+            messages.success(request, "Your comment has been posted successfully!")
+        
+        # Redirect back to the blog post
+        return redirect('single', bid=bid)
+    
+    # If not POST, redirect to the blog post
+    return redirect('single', bid=bid)
 
 def testimonial(request):
     return render(request, 'user/testimonial.html')
@@ -287,8 +325,8 @@ def generate_ai_itinerary(request):
     - Travel tips and cultural insights.
 
     Format response as:
-    **Day 1:** Activity details
-    **Day 2:** Activity details
+    Day 1: Activity details
+    Day 2: Activity details
     """
 
     try:
@@ -429,12 +467,18 @@ def edit_user_profile(request):
     
     return render(request, 'profile.html', {'user_profile': user_profile})
 
+
 def booking(request, package_id):
-    package = get_object_or_404(TravelPackage, id=package_id) 
-    itineraries = package.itineraries.all()
-    coupons = Coupon.objects.filter(user=request.user, is_used=False)
+    if request.user.is_authenticated:
+        package = get_object_or_404(TravelPackage, id=package_id) 
+        itineraries = package.itineraries.all()
+        coupons = Coupon.objects.filter(user=request.user, is_used=False)
+        return render(request, 'user/booking.html', {'package': package, "itineraries":itineraries, "coupons":coupons})
+    # user = request.user
+    else:
+        return redirect ('login')
     #print(package) 
-    return render(request, 'user/booking.html', {'package': package, "itineraries":itineraries, "coupons":coupons})
+    # return render(request, 'user/booking.html', {'package': package, "itineraries":itineraries, "coupons":coupons})
 
 
 # def store_bookings(request, package_id): 
@@ -609,7 +653,8 @@ def success_view(request):
             travel_package=package,
             travel_date=travel_date,  # Now correctly validated
             travelers_count=1,
-            total_price=price
+            total_price=price,
+            payment_status='paid'
         )
 
         # Calculate and save commission for admin
@@ -624,8 +669,12 @@ def success_view(request):
                 booking=booking
             )
 
-        travel_agent_profile = package.travel_agent.travelagentprofile
-        send_fcm_notification(travel_agent_profile, booking)
+        users = package.travel_agent
+        travel_agent_profile = TravelAgentProfile.objects.filter(user=users).first()
+        
+        if travel_agent_profile:
+            send_fcm_notification(travel_agent_profile, booking)
+        
 
         recipient_email = notification_email if notification_email else user.email
 

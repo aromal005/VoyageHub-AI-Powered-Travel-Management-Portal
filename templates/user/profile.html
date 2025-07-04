@@ -17,8 +17,8 @@
                 <a href="{% url 'wishlist' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'wishlist' %}active{% endif %}">
                     <i class="fas fa-heart"></i> Wishlists
                 </a>
-                <a href="{% url 'user_complaint_view' %}" class="list-group-item list-group-item-action">
-                    <i class="fas fa-map-marker-alt"></i> My complaints
+                <a href="{% url 'user_complaint_view' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'complaints' %}active{% endif %}">
+                    <i class="fas fa-exclamation-circle"></i> Complaints
                 </a>
                 <a href="{% url 'coupon' %}" class="list-group-item list-group-item-action">
                     <i class="fas fa-ticket-alt"></i> Coupons
@@ -72,7 +72,7 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="email" class="form-label">Email</label>
-                                        <input type="email" class="form-control" id="email" name="email" value="{{ request.user.email }}" readonly>
+                                        <input type="email" class="form-control" id="email" name="email" value="{{ request.user.email }}">
                                     </div>
                                     <div class="mb-3">
                                         <label for="phone" class="form-label">Phone Number</label>

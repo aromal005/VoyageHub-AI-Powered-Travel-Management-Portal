@@ -72,7 +72,7 @@
                     {{ customer.last_booking_date|date:"F d, Y"|default:"No bookings" }}</p>
                 <p><strong>Preferred Destinations:</strong> 
                     {{ customer.preferred_destinations|join:", "|default:"None" }}</p>
-                <p><strong>Reviews & Ratings Given:</strong> No ratings</p>
+                <p><strong>Reviews & Ratings Given:</strong>{{customer.latest_rating}}★</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

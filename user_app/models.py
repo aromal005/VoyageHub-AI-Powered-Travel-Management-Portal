@@ -86,3 +86,11 @@ class Complaint(models.Model):
 
     def __str__(self):
         return f"Complaint by {self.name} - {self.subject}"
+    
+
+class Comments(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='comments')
+    email = models.EmailField()
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    blog = models.ForeignKey(Blog, on_delete=models.CASCADE)
