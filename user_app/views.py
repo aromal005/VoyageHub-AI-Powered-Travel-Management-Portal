@@ -98,7 +98,6 @@ def blog(request):
     
     search_query = request.GET.get('search_query')
     category_filter = request.GET.get('category')
-    print(f"category-filter : {category_filter}")
     if search_query:
         blogs = blogs.filter(title__icontains=search_query)
 
@@ -115,7 +114,36 @@ def single(request, bid):
     category_blog_counts = Category.objects.annotate(blog_count=Count('blog'))
     recent_blogs = Blog.objects.order_by('-created_at')[:5]
     parts = blog.content.split("[image]") 
-    return render(request, 'user/single.html', {"blog":blog, "parts": parts, "category_blog_counts":category_blog_counts, "recent_blogs":recent_blogs})
+
+    comments = Comments.objects.filter(blog=blog)
+
+    comment_count = comments.count()
+    print(f"User : {request.user}")
+
+    
+    return render(request, 'user/single.html', {"blog":blog, "parts": parts, "category_blog_counts":category_blog_counts, "recent_blogs":recent_blogs, "comments":comments, "comment_count":comment_count})
+
+def add_comment(request, bid):
+    blog = get_object_or_404(Blog, id=bid)
+    
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        comment = request.POST.get('comment')
+        
+        # Validate form data
+        if not name or not email or not comment:
+            messages.error(request, "All required fields must be filled.")
+        else:
+            # Create and save the comment
+            Comments.objects.create(user=request.user if request.user.is_authenticated else name,email=email,comment=comment,blog=blog)
+            messages.success(request, "Your comment has been posted successfully!")
+        
+        # Redirect back to the blog post
+        return redirect('single', bid=bid)
+    
+    # If not POST, redirect to the blog post
+    return redirect('single', bid=bid)
 
 def testimonial(request):
     return render(request, 'user/testimonial.html')
