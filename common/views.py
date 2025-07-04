@@ -12,13 +12,9 @@ User = get_user_model()
 
 # User Registration
 def register_user(request):
-    print("🚀 register_user function called")  # Debugging
-
     if request.method == "POST":
-        print("📝 Received a POST request")  # Debugging
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            print("✅ Form is valid")  # Debugging
             form.save()
             return redirect("login")
         else:
