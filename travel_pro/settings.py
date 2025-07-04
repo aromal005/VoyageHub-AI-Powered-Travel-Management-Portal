@@ -41,10 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user_app',
-    'travel_agent',
+    # 'travel_agent',
     'common',
     'admin_app',
-    'django_celery_results',
+    'background_task',
+    'travel_agent.apps.TravelAgentConfig',
 ]
 
 MIDDLEWARE = [
@@ -172,14 +173,6 @@ firebase_admin.initialize_app(cred)
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-
-# Celery Configuration
-CELERY_BROKER_URL = 'django-db://'  # Use Django database as broker
-CELERY_RESULT_BACKEND = 'django-db'  # Store results in Django database
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_CACHE_BACKEND = 'django-cache'  # Optional: use Django cache for optimization
 
 # Email Configuration (unchanged)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

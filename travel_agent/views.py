@@ -42,18 +42,15 @@ def dashboard(request):
 
     # Get total packages for the logged-in travel agent
     total_packages = TravelPackage.objects.filter(travel_agent=request.user).count()
-    print(f"Total packages for {username}: {total_packages}")
 
     # Get bookings for the agent's packages
     bookings = Booking.objects.filter(travel_package__travel_agent=request.user)
     total_bookings = bookings.count()
-    print(f"Total bookings for {username}: {total_bookings}")
 
     # Calculate total revenue from confirmed and paid bookings
     total_revenue = bookings.filter(status='confirmed', payment_status='paid').aggregate(
         total=Sum('total_price')
     )['total'] or 0
-    print(f"Total revenue for {username}: {total_revenue}")
 
     context = {
         'username': username,
@@ -61,7 +58,6 @@ def dashboard(request):
         'total_bookings': total_bookings,
         'total_revenue': f"${float(total_revenue):,.2f}",
     }
-    print(f"Context sent to template: {context}")
 
     return render(request, 'travel_agent/dashboard.html', context)  
 
